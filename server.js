@@ -33,11 +33,7 @@ var server = http.createServer(function (request, response) {
         request.on('end', () => {
             console.log(array);
             const string = Buffer.concat(array).toString();
-            console.log(string)
             const obj = JSON.parse(string)
-            console.log(obj)
-            console.log(obj.name)
-            console.log(obj.password)
 
             const lastUser = userArray[userArray.length - 1]
             const newUser = {
@@ -46,11 +42,9 @@ var server = http.createServer(function (request, response) {
                 name: obj.name,
                 password: obj.password
             }
-
-            const str = JSON.stringify(userArray)
-            fs.writeFileSync('./db/user.json', str)
-            response.end('很好')
-
+            userArray.push(newUser)
+            fs.writeFileSync('./db/user.json', JSON.stringify(userArray))
+            response.end()
         })
     } else {
         response.statusCode = 200
