@@ -1,3 +1,3 @@
 ```
-node-dev server.js 8888
+node server.js 8888
 ```
