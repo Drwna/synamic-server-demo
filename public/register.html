@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <meta name="viewport"
+            content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+        <title>signing</title>
+        <style>
+            * {
+                padding: 4px;
+            }
+
+            #registerForm span {
+                display: inline-block;
+                width: 50px;
+                text-align-last: justify;
+            }
+        </style>
+    </head>
+
+    <body>
+        <form id='registerForm'>
+            <div>
+                <label> <span>用户名</span> <input type=" text" name="name">
+                </label>
+            </div>
+            <div>
+                <label> <span>密码</span> <input type="password" name="password">
+                </label>
+            </div>
+            <div>
+                <button type="submit">注册</button>
+            </div>
+        </form>
+        <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script>
+            const $form = $('#registerForm');
+            $form.on('submit', (e) => {
+                e.preventDefault(); // 阻止 from 自动刷新
+                const name = $form.find('input[name=name]').val();
+                const password = $form.find('input[name=password]').val();
+                console.log(name, password);
+                if (name === "" || password === "") {
+                    alert("用户名或密码不能为空!");
+                    return false;
+                } else {
+                    $.ajax({
+                        method: 'POST',
+                        url: '/register',
+                        contentType: 'text/json; charset=UTF-8',
+                        data: JSON.stringify({
+                            name,
+                            password
+                        })
+                    }).then(() => {
+                        alert('注册成功');
+                        location.href = './sign_in.html';
+                    }, () => {})
+                }
+            })
+        </script>
+    </body>
+
+</html>
