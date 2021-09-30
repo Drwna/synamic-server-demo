@@ -63,7 +63,9 @@
                     }).then(() => {
                         alert('登录成功');
                         location.href = './home.html';
-                    }, () => {})
+                    }, () => {
+                        alert('用户名或密码错误')
+                    })
                 }
             })
         </script>

@@ -23,6 +23,8 @@ var server = http.createServer(function (request, response) {
 
     console.log('有个傻子发请求过来啦！路径（带查询参数）为：' + pathWithQuery)
 
+    const session = JSON.parse(fs.readFileSync('./session.json').toString())
+
     if (path === '/sign_in' && method === 'POST') {
         response.setHeader('Content-Type', 'text/html;charset=utf-8')
         const userArray = JSON.parse(fs.readFileSync('./db/user.json'))
@@ -31,7 +33,6 @@ var server = http.createServer(function (request, response) {
             array.push(chunk)
         })
         request.on('end', () => {
-            console.log(array);
             const string = Buffer.concat(array).toString();
             const obj = JSON.parse(string) // name password
             const user = userArray.find((user) => user.name === obj.name && user.password === obj.password)
@@ -42,7 +43,8 @@ var server = http.createServer(function (request, response) {
             } else {
                 response.statusCode = 200
                 const random = Math.random()
-                const session = JSON.parse(fs.readFileSync('./session.json').toString())
+                console.log(fs.readFileSync('./session.json'))
+                console.log(session)
                 session[random] = {
                     user_id: user.id
                 }
@@ -55,23 +57,23 @@ var server = http.createServer(function (request, response) {
     } else if (path === '/home.html') {
         // 写不出
         const cookie = request.headers['cookie']
-        console.log(cookie)
-        let userId
+        let sessionId
         try { // 防止 userId 为空等原因报错
-            userId = cookie.split(';').filter(s => s.indexOf('user_id=') >= 0)[0].split('=')[1]
+            sessionId = cookie
+                .split(';')
+                .filter(s => s.indexOf('session_id=') >= 0)[0]
+                .split('=')[1]
         } catch (error) {}
-        console.log(userId)
 
-        if (userId) {
+        if (sessionId) {
+            const userId = session[sessionId].user_id
             const userArray = JSON.parse(fs.readFileSync('./db/user.json'))
-            const user = userArray.find(user => user.id.toString() === userId)
-            console.log(user)
+            const user = userArray.find(user => user.id === userId)
             const homeHTML = fs.readFileSync('./public/home.html').toString()
             let string
             if (user) {
                 string = homeHTML.replace(`{{loginStatus}}`, '已登录')
                     .replace(`{{user.name}}`, user.name)
-                console.log('fuck')
             }
             response.write(string)
         } else {
