@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <meta name="viewport"
             content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-        <title>signing</title>
+        <title>注册</title>
         <style>
             * {
                 padding: 4px;
@@ -17,10 +17,15 @@
                 width: 50px;
                 text-align-last: justify;
             }
+
+            #registerForm button {
+                margin-left: 60px;
+            }
         </style>
     </head>
 
     <body>
+        <h1>用户注册</h1>
         <form id='registerForm'>
             <div>
                 <label> <span>用户名</span> <input type=" text" name="name">
@@ -32,6 +37,7 @@
             </div>
             <div>
                 <button type="submit">注册</button>
+                <button type="button" onclick="location.href='./sign_in.html'">登录</button>
             </div>
         </form>
         <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>

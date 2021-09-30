@@ -23,7 +23,65 @@ var server = http.createServer(function (request, response) {
 
     console.log('有个傻子发请求过来啦！路径（带查询参数）为：' + pathWithQuery)
 
-    if (path === '/register' && method === 'POST') {
+    if (path === '/sign_in' && method === 'POST') {
+        response.setHeader('Content-Type', 'text/html;charset=utf-8')
+        const userArray = JSON.parse(fs.readFileSync('./db/user.json'))
+        const array = []
+        request.on('data', (chunk) => {
+            array.push(chunk)
+        })
+        request.on('end', () => {
+            console.log(array);
+            const string = Buffer.concat(array).toString();
+            const obj = JSON.parse(string) // name password
+            const user = userArray.find((user) => user.name === obj.name && user.password === obj.password)
+            if (user === undefined) {
+                response.statusCode = 400
+                response.setHeader('Content-Type', 'text/json;charset=utf-8')
+                response.end(`{"errorCode": 4001}`)
+            } else {
+                response.statusCode = 200
+                const random = Math.random()
+                const session = JSON.parse(fs.readFileSync('./session.json').toString())
+                session[random] = {
+                    user_id: user.id
+                }
+                fs.writeFileSync('./session.json', JSON.stringify(session))
+                response.setHeader('Set-Cookie', `session_id=${random}; HTTPOnly`)
+            }
+            response.end();
+        })
+
+    } else if (path === '/home.html') {
+        // 写不出
+        const cookie = request.headers['cookie']
+        console.log(cookie)
+        let userId
+        try { // 防止 userId 为空等原因报错
+            userId = cookie.split(';').filter(s => s.indexOf('user_id=') >= 0)[0].split('=')[1]
+        } catch (error) {}
+        console.log(userId)
+
+        if (userId) {
+            const userArray = JSON.parse(fs.readFileSync('./db/user.json'))
+            const user = userArray.find(user => user.id.toString() === userId)
+            console.log(user)
+            const homeHTML = fs.readFileSync('./public/home.html').toString()
+            let string
+            if (user) {
+                string = homeHTML.replace(`{{loginStatus}}`, '已登录')
+                    .replace(`{{user.name}}`, user.name)
+                console.log('fuck')
+            }
+            response.write(string)
+        } else {
+            const homeHTML = fs.readFileSync('./public/home.html').toString()
+            const string = homeHTML.replace(`{{loginStatus}}`, '未登录')
+                .replace(`{{user.name}}`, '')
+            response.write(string)
+        }
+        response.end();
+    } else if (path === '/register' && method === 'POST') {
         response.setHeader('Content-Type', 'text/html;charset=utf-8')
         const userArray = JSON.parse(fs.readFileSync('./db/user.json'))
         const array = []
@@ -44,7 +102,7 @@ var server = http.createServer(function (request, response) {
             }
             userArray.push(newUser)
             fs.writeFileSync('./db/user.json', JSON.stringify(userArray))
-            response.end()
+            response.end();
         })
     } else {
         response.statusCode = 200
@@ -69,9 +127,8 @@ var server = http.createServer(function (request, response) {
             response.statusCode = 404
         }
         response.write(content)
-        response.end()
+        response.end();
     }
-
 
     /******** 代码结束，下面不要看 ************/
 })
